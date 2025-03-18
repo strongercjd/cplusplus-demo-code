@@ -12,7 +12,6 @@ void ModelFactory::registerModel(const std::string& type, Creator creator) {
 std::unique_ptr<ModelA> ModelFactory::create(const std::string& type) {
     if (auto it = registry_.find(type); it != registry_.end()) {
         auto model = it->second();
-        model->registerCommands();
         return model;
     }
     return nullptr;

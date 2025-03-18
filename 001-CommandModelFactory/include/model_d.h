@@ -6,5 +6,6 @@ protected:
     void actioncmdWS(const std::string& content);
 
 public:
-    void registerCommands() override;
+    ModelD();
+    void registerCommands() ;
 };

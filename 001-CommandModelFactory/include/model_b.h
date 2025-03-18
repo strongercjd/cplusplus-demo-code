@@ -6,5 +6,6 @@ protected:
     void actioncmdER(const std::string& content);
 
 public:
-    void registerCommands() override;
+    ModelB();
+    void registerCommands() ;
 };

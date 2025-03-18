@@ -1,5 +1,6 @@
 #include "model_a.h"
 #include <iostream>
+#include "model_factory.h"
 
 void ModelA::registerCommand(const std::string& cmd, std::function<void(const std::string&)> handler) {
     command_handlers[cmd] = handler;
@@ -21,7 +22,12 @@ void ModelA::actioncmdER(const std::string& content) {
     std::cout << "[ModelA] ER Action Content: " << content << "\n";
 }
 
-ModelA::ModelA() { registerCommands(); }
+ModelA::ModelA() 
+{
+    registerCommands(); 
+    std::cout << "[ModelA] created\n";
+}
+
 
 void ModelA::registerCommands() {
     registerCommand("AA", [this](auto&& content) { actioncmdAA(content); });
@@ -37,3 +43,5 @@ void ModelA::handleCommand(const std::string& cmd, const std::string& content) {
         std::cout << "Unknown command: " << cmd << "\n";
     }
 }
+
+DEVICE_REGISTER("A", ModelA);

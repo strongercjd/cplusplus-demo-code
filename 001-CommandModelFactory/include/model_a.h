@@ -16,7 +16,7 @@ protected:
 
 public:
     ModelA();
-    virtual ~ModelA() = default;
-    virtual void registerCommands();
+    ~ModelA() {}
+    void registerCommands();
     void handleCommand(const std::string& cmd, const std::string& content);
 };
