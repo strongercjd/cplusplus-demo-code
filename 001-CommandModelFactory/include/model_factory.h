@@ -2,6 +2,7 @@
 #include <memory>
 #include <functional>
 #include "model_a.h"
+#include <vector>
 
 // #include "testclass.h"
 
@@ -12,6 +13,7 @@ public:
     
     static ModelFactory& instance();
     void registerModel(const std::string& type, Creator creator);
+    std::vector<std::string> getRegisteredTypes() const ;
     std::unique_ptr<ModelA> create(const std::string& type,TestClass& test_code);
 
 private:
