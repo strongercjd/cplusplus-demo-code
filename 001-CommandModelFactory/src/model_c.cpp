@@ -2,8 +2,11 @@
 #include "model_factory.h"
 #include <iostream>
 
+#include "testclass.h"
 
-ModelC::ModelC() {
+
+ModelC::ModelC(TestClass& test_code) :ModelB(test_code)
+{
     registerCommands();
     std::cout << "[ModelC] ModelC Created\n";
 }

@@ -6,6 +6,6 @@ protected:
     void actioncmdWS(const std::string& content);
 
 public:
-    ModelD();
+    ModelD(TestClass& test_code);
     void registerCommands() ;
 };

@@ -6,6 +6,6 @@ protected:
     void actioncmdER(const std::string& content);
 
 public:
-    ModelB();
+    ModelB(TestClass& test_code);
     void registerCommands() ;
 };

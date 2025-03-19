@@ -14,4 +14,5 @@ add_executable(${PROJECT_NAME}
     src/model_c.cpp
     src/model_d.cpp
     src/model_factory.cpp
+    src/testclass.cpp
 )

@@ -2,7 +2,10 @@
 #include "model_factory.h"
 #include <iostream>
 
-ModelD::ModelD() {
+#include "testclass.h"
+
+ModelD::ModelD(TestClass& test_code): ModelA(test_code)
+{
     registerCommands();
     std::cout << "[ModelD] ModelD Created\n";
 }

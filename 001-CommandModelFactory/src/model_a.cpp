@@ -2,6 +2,8 @@
 #include <iostream>
 #include "model_factory.h"
 
+#include "testclass.h"
+
 void ModelA::registerCommand(const std::string& cmd, std::function<void(const std::string&)> handler) {
     command_handlers[cmd] = handler;
 }
@@ -22,10 +24,11 @@ void ModelA::actioncmdER(const std::string& content) {
     std::cout << "[ModelA] ER Action Content: " << content << "\n";
 }
 
-ModelA::ModelA() 
+ModelA::ModelA(TestClass& test_code):testclass(test_code)
 {
     registerCommands(); 
     std::cout << "[ModelA] created\n";
+    testclass.printfself();
 }
 
 

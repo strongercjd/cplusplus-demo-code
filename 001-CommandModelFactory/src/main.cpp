@@ -2,7 +2,23 @@
 #include <cctype>
 #include "model_factory.h"
 
-void processCommands() {
+#include "testclass.h"
+
+class MainClass
+{
+public:
+    MainClass(){}
+    ~MainClass(){}
+
+    TestClass test_code;
+
+    void processCommands();
+
+};
+
+
+void MainClass::processCommands() 
+{
     std::string input;
     while (true) {
         std::cout << "Enter command (@[A-D][AA/WS/QS/ER][00-99]*): ";
@@ -25,7 +41,7 @@ void processCommands() {
             input.substr(4, star_pos - 4) : "";
 
         // 创建对应型号
-        auto model = ModelFactory::instance().create(model_type);
+        auto model = ModelFactory::instance().create(model_type,test_code);
         if (!model) {
             std::cout << "Invalid model: " << model_char << "\n";
             continue;
@@ -37,6 +53,7 @@ void processCommands() {
 }
 
 int main() {
-    processCommands();
+    MainClass test;
+    test.processCommands();
     return 0;
 }

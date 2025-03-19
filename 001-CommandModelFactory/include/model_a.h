@@ -3,6 +3,7 @@
 #include <functional>
 #include <string>
 
+class TestClass;
 class ModelA {
 protected:
     std::unordered_map<std::string, std::function<void(const std::string&)>> command_handlers;
@@ -15,7 +16,8 @@ protected:
     void actioncmdER(const std::string& content);
 
 public:
-    ModelA();
+    TestClass& testclass;
+    ModelA(TestClass& test_code);
     ~ModelA() {}
     void registerCommands();
     void handleCommand(const std::string& cmd, const std::string& content);
