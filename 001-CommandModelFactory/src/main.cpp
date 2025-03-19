@@ -21,6 +21,14 @@ void MainClass::processCommands()
 {
     std::string input;
     while (true) {
+        
+        auto&& supported_types = ModelFactory::instance().getRegisteredTypes();
+            std::cout << "support modes: ";
+            for (const auto& type : supported_types) {
+                std::cout << type << " ";
+        }
+        std::cout << std::endl;
+
         std::cout << "Enter command (@[A-D][AA/WS/QS/ER][00-99]*): ";
         std::cin >> input;
         
