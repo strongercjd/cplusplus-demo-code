@@ -30,7 +30,7 @@ int main() {
         g_fileWatcher = &watcher;
         try
         {
-            watcher.addWatch(PROJECT_ROOT"/server/configs/a1pp.json");
+            watcher.addWatch(PROJECT_ROOT"/server/configs/app.json");
         }
         catch(const std::exception& e)
         {
