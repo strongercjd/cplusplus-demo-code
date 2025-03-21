@@ -53,9 +53,17 @@ void FileWatcher::start() {
             ssize_t length = read(m_inotifyFd, buffer, BUF_LEN);
             if (length < 0) {
                 if (m_running) {
-                    std::cerr << "Error reading inotify events" << std::endl;
+                    // 过滤非阻塞模式下的正常返回
+                    if (errno != EAGAIN && errno != EWOULDBLOCK) {
+                        std::cerr << "Error reading inotify events: " 
+                                  << strerror(errno) << std::endl;
+                    }
+                    // 添加短暂休眠避免CPU占用
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 }
-                break;
+                continue;  // 保持循环而不是退出
+            }else{
+                std::cout << "Read inotify events (" << length << " bytes)"<< std::endl;
             }
 
             for (char* ptr = buffer; ptr < buffer + length; ) {
@@ -82,6 +90,11 @@ void FileWatcher::handleFileModify(int wd) {
             std::ifstream file(it->second);
             nlohmann::json content;
             file >> content;
+            
+            // 添加JSON内容打印
+            std::cout << "Modified JSON content (" << it->second << "):\n"
+                      << content.dump(4) << "\n" << std::endl;
+            
             m_ipcManager.sendUpdate(it->second, content);
         } catch (const std::exception& e) {
             std::cerr << "Error handling file update: " << e.what() << std::endl;

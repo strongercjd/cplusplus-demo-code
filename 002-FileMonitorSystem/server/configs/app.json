@@ -1,1 +1,5 @@
-{"key":"value"}
+{
+    "key": "new_value",
+    "updated": true
+}
+
