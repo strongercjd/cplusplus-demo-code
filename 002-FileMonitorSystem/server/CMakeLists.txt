@@ -3,6 +3,9 @@ project(IPC_Server)
 
 set(CMAKE_CXX_STANDARD 17)
 
+# 在server子项目中添加
+add_definitions(-DPROJECT_ROOT="${CMAKE_SOURCE_DIR}")
+
 
 # 可执行文件配置
 add_executable(ipc_server

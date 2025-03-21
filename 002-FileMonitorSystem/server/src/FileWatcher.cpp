@@ -31,10 +31,15 @@ FileWatcher::~FileWatcher() {
 
 void FileWatcher::addWatch(const std::string& filename) {
     std::lock_guard<std::mutex> lock(m_mutex);
+
+    // 添加路径验证和错误细节
+    if (access(filename.c_str(), F_OK) == -1) {
+        throw std::runtime_error("File not found: " + filename + " (" + strerror(errno) + ")");
+    }
     
     int wd = inotify_add_watch(m_inotifyFd, filename.c_str(), IN_MODIFY);
     if (wd < 0) {
-        throw std::runtime_error("Failed to add watch for file: " + filename);
+        throw std::runtime_error("Failed to add watch for file: " + filename + " (" + strerror(errno) + ")");
     }
     
     m_watchedFiles[wd] = filename;

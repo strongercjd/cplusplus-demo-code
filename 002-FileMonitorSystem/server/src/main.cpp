@@ -28,7 +28,16 @@ int main() {
         // 初始化文件监控
         FileWatcher watcher(manager);
         g_fileWatcher = &watcher;
-        watcher.addWatch("/home/chenjd/code/C++demo/server/configs/app.json");
+        try
+        {
+            watcher.addWatch(PROJECT_ROOT"/server/configs/a1pp.json");
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+            return EXIT_FAILURE;
+        }
+        
         
         // 注册信号处理
         signal(SIGINT, signalHandler);
