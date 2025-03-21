@@ -79,6 +79,13 @@ void FileWatcher::start() {
 
 void FileWatcher::stop() {
     m_running = false;
+    
+    std::lock_guard<std::mutex> lock(m_mutex);
+    for (const auto& [wd, path] : m_watchedFiles) {
+        inotify_rm_watch(m_inotifyFd, wd);
+    }
+    m_watchedFiles.clear();
+    
     close(m_inotifyFd);
 }
 
