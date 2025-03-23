@@ -98,6 +98,15 @@ void FileWatcher::handleFileModify(int wd) {
             nlohmann::json content;
             file >> content;
             
+            // 新增：提取纯文件名
+            size_t pos = it->second.find_last_of("/\\");
+            std::string filename = (pos != std::string::npos) ? 
+                                  it->second.substr(pos + 1) : 
+                                  it->second;
+            
+            // 使用纯文件名发送更新
+            m_ipcManager.sendUpdate(filename, content);
+            
             // 添加JSON内容打印
             std::cout << "Modified JSON content (" << it->second << "):\n"
                       << content.dump(4) << "\n" << std::endl;

@@ -45,8 +45,8 @@ int main() {
         
         
         // 注册信号处理
-        signal(SIGINT, signalHandler);
-        signal(SIGTERM, signalHandler);
+        signal(SIGINT, signalHandler);// SIGINT:捕获Ctrl+C,当用户在终端按 Ctrl+C 时触发
+        signal(SIGTERM, signalHandler);// SIGTERM:捕获终止信号,当进程接收到终止信号时触发（如 kill 命令）
         
         // 启动服务
         g_fileWatcher->start();

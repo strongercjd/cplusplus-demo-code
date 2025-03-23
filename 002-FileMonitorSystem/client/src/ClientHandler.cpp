@@ -35,6 +35,8 @@ void ClientHandler::subscribe(const std::string& filename) {
     msg.payload["filename"] = filename;
     
     std::string data = nlohmann::json(msg).dump();
+    //打印data
+    std::cout << "subscribe data: " << data << std::endl;
     write(m_socketFd, data.c_str(), data.size());
 }
 
@@ -61,7 +63,8 @@ void ClientHandler::startListening(UpdateCallback callback) {
                 }
                 break;
             }
-
+            //打印接收到的消息
+            std::cout << "Client received message: " << buffer << std::endl;
             try {
                 auto msg = nlohmann::json::parse(buffer, buffer + count);
                 auto protocolMsg = msg.get<IPCProtocol::Message>();

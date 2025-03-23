@@ -3,7 +3,8 @@
 #include <csignal>
 #include <thread>
 
-ClientHandler* g_client = nullptr;
+// ClientHandler* g_client = nullptr;
+std::unique_ptr<ClientHandler> g_client;
 
 void signalHandler(int signum) {
     if (g_client) {
@@ -28,14 +29,13 @@ int main(int argc, char* argv[]) {
     const std::string filename = argv[1];
 
     try {
-        ClientHandler client(socketPath);
-        g_client = &client;
-        
-        signal(SIGINT, signalHandler);
-        signal(SIGTERM, signalHandler);
+        g_client = std::make_unique<ClientHandler>(socketPath);
 
-        client.subscribe(filename);
-        client.startListening(printUpdate);
+        signal(SIGINT, signalHandler);// SIGINT:捕获Ctrl+C,当用户在终端按 Ctrl+C 时触发
+        signal(SIGTERM, signalHandler);// SIGTERM:捕获终止信号,当进程接收到终止信号时触发（如 kill 命令）
+
+        g_client->subscribe(filename);
+        g_client->startListening(printUpdate);
 
         std::cout << "Listening for updates on " << filename 
                  << ". Press Ctrl+C to exit..." << std::endl;

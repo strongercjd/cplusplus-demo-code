@@ -78,8 +78,8 @@ void IPCManager::handleClientConnection() {
         return;
     }
 
-    //打印客户端地址
-    std::cout << "Client connected: " << client_addr.sun_path << std::endl;
+    //打印客户端id
+    std::cout << "Client connected client_fd: " << client_fd << std::endl;
 
     // 处理客户端消息
     thread([this, client_fd]() {
@@ -89,6 +89,8 @@ void IPCManager::handleClientConnection() {
             if (count <= 0) {
                 break;
             }
+            //打印接收到的消息
+            std::cout << "Received message: " << buffer << std::endl;
             // 反序列化消息
             try {
                 auto msg = nlohmann::json::parse(buffer, buffer + count);
@@ -112,7 +114,7 @@ void IPCManager::handleClientConnection() {
       * 用于异步处理客户端连接
       * 每个客户端连接都会创建独立的后台线程
       * 主线程可以继续接受新的客户端连接
-      * 线程内部已妥善处理了client_fd的关闭操作
+      * 线程内部已妥善处理了client_fd的关payload闭操作
     */
 }
 
@@ -143,6 +145,12 @@ void IPCManager::sendUpdate(const string& filename, const nlohmann::json& conten
     IPCProtocol::Message msg{IPCProtocol::MessageType::FILE_UPDATE, update};
 
     auto clients = m_subManager.getSubscribers(filename);
+    //打印clients大小
+    std::cout << "Subscribers for [" << filename << "] size: " << clients.size() << std::endl;
+    //打印clients每个元素
+    for (int fd : clients) {
+        std::cout << "Subscribers for [" << filename << "]: fd=" << fd << std::endl;
+    }
     for (int fd : clients) {
         string data = nlohmann::json(msg).dump();// 序列化消息
         //static_cast<void> 用于显式忽略返回值（避免未使用返回值的编译警告）
