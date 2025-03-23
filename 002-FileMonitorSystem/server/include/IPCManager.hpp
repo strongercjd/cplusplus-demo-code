@@ -5,6 +5,7 @@
 #include <mutex>
 #include "Protocol.hpp"
 
+// 订阅管理器
 class SubscriptionManager {
 public:
     void addSubscription(const std::string& filename, int client_fd);

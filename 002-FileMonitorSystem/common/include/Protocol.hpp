@@ -4,9 +4,9 @@
 namespace IPCProtocol {
     // 通信消息类型
     enum class MessageType {
-        SUBSCRIBE,
-        UNSUBSCRIBE,
-        FILE_UPDATE,
+        SUBSCRIBE,//订阅
+        UNSUBSCRIBE,//取消订阅
+        FILE_UPDATE,//文件更新
         ERROR
     };
 
