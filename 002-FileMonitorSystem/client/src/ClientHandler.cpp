@@ -75,6 +75,15 @@ void ClientHandler::startListening(UpdateCallback callback) {
                         m_callback(update.filename, update.content);
                     }
                 }
+                // 消息处理部分
+                if (protocolMsg.type == IPCProtocol::MessageType::SUBSCRIBE_RESPONSE) {
+                    auto resp = protocolMsg.payload.get<IPCProtocol::SubscribeResponse>();
+                    if (resp.success) {
+                        std::cout << "Subscribe success " << std::endl;
+                    } else {
+                        std::cerr << "Subscribe failed: " << resp.reason << std::endl;
+                    }
+                }
             } catch (const std::exception& e) {
                 std::cerr << "Error processing message: " << e.what() << std::endl;
             }

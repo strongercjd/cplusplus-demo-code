@@ -6,6 +6,7 @@
 #include <thread>
 #include <iostream>
 #include <vector>
+#include "FileWatcher.hpp"
 
 using namespace std;
 
@@ -13,6 +14,7 @@ IPCManager::~IPCManager() = default;
 
 IPCManager::IPCManager(const string& socketPath) : 
     m_socketPath(socketPath), 
+    m_fileWatcher(nullptr),
     m_running(false) {
 
     // 创建UNIX域套接字
@@ -122,7 +124,35 @@ void IPCManager::handleMessage(const IPCProtocol::Message& msg, int client_fd) {
     switch(msg.type) {
         case IPCProtocol::MessageType::SUBSCRIBE: {
             string filename = msg.payload["filename"];
+
+            if (!m_fileWatcher) {
+                throw std::runtime_error("FileWatcher not bound");
+                return;
+            }
+            
+            // 文件校验逻辑
+            if (!m_fileWatcher->isWatching(filename)) {
+                // 发送失败响应
+                IPCProtocol::SubscribeResponse resp{false, "File not monitored"};
+                IPCProtocol::Message responseMsg{
+                    IPCProtocol::MessageType::SUBSCRIBE_RESPONSE,
+                    resp
+                };
+                string data = nlohmann::json(responseMsg).dump();
+                write(client_fd, data.c_str(), data.size());
+                return;
+            }
+            
             m_subManager.addSubscription(filename, client_fd);
+            
+            // 发送成功响应
+            IPCProtocol::SubscribeResponse resp{true, ""};
+            IPCProtocol::Message responseMsg{
+                IPCProtocol::MessageType::SUBSCRIBE_RESPONSE,
+                resp
+            };
+            string data = nlohmann::json(responseMsg).dump();
+            write(client_fd, data.c_str(), data.size());
             break;
         }
         case IPCProtocol::MessageType::UNSUBSCRIBE: {
@@ -156,4 +186,13 @@ void IPCManager::sendUpdate(const string& filename, const nlohmann::json& conten
         //static_cast<void> 用于显式忽略返回值（避免未使用返回值的编译警告）
         static_cast<void>(write(fd, data.c_str(), data.size()));// 发送消息给订阅者
     }
+}
+/**
+ * @brief  绑定文件监视器
+ *
+ * @param fileWatcher  文件监视器
+ */
+void IPCManager::bindFileWatcher(FileWatcher& fileWatcher) 
+{
+    m_fileWatcher = &fileWatcher;
 }

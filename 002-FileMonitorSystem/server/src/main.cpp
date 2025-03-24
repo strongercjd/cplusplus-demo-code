@@ -32,6 +32,7 @@ int main() {
         */
         g_ipcManager = std::make_unique<IPCManager>(socketPath);// 初始化IPC管理器
         g_fileWatcher = std::make_unique<FileWatcher>(*g_ipcManager);// 初始化文件监控
+        g_ipcManager->bindFileWatcher(*g_fileWatcher);   
         
         try
         {

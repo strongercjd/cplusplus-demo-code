@@ -16,6 +16,7 @@ public:
     void addWatch(const std::string& filename);
     void start();
     void stop();
+    bool isWatching(const std::string& filename);
 
 private:
     void handleFileModify(int wd);

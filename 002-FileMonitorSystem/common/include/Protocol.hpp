@@ -7,6 +7,7 @@ namespace IPCProtocol {
         SUBSCRIBE,//订阅
         UNSUBSCRIBE,//取消订阅
         FILE_UPDATE,//文件更新
+        SUBSCRIBE_RESPONSE, // 订阅响应类型
         ERROR
     };
 
@@ -24,5 +25,13 @@ namespace IPCProtocol {
         nlohmann::json content;
         
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(FileUpdate, filename, content)
+    };
+
+    // 订阅响应结构
+    struct SubscribeResponse {
+        bool success;
+        std::string reason;
+        
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE(SubscribeResponse, success, reason)
     };
 }

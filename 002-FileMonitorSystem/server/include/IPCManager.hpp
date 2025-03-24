@@ -5,6 +5,8 @@
 #include <mutex>
 #include "Protocol.hpp"
 
+class FileWatcher;
+
 // 订阅管理器
 class SubscriptionManager {
 public:
@@ -26,9 +28,14 @@ public:
     void stop();
     void sendUpdate(const std::string& filename, const nlohmann::json& content);
 
+    void bindFileWatcher(FileWatcher& fileWatcher);
+
 private:
     void handleClientConnection();
     void handleMessage(const IPCProtocol::Message& msg, int client_fd);
+    
+
+    FileWatcher* m_fileWatcher;
 
     std::string m_socketPath;
     int m_serverFd = -1;

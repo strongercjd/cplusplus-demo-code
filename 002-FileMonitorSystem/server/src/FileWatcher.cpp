@@ -1,13 +1,12 @@
+#include "FileWatcher.hpp"
 #include "IPCManager.hpp"
 #include <sys/inotify.h>
 #include <unistd.h>
 #include <limits.h>
 #include <thread>
-#include "FileWatcher.hpp"
-#include "IPCManager.hpp"
+
 #include <iostream>
 #include <fstream>
-#include <unistd.h>
 #include <sys/inotify.h>
 #include <stdexcept>
 
@@ -29,6 +28,19 @@ FileWatcher::~FileWatcher() {
     stop();
 }
 
+bool FileWatcher::isWatching(const std::string& filename) 
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    for (const auto& [wd, path] : m_watchedFiles) {
+        // 从完整路径中提取纯文件名
+        size_t pos = path.find_last_of("/\\");
+        std::string baseName = (pos != std::string::npos) ? 
+                             path.substr(pos + 1) : 
+                             path;
+        if (baseName == filename) return true;
+    }
+    return false;
+}
 void FileWatcher::addWatch(const std::string& filename) {
     std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -41,7 +53,7 @@ void FileWatcher::addWatch(const std::string& filename) {
     if (wd < 0) {
         throw std::runtime_error("Failed to add watch for file: " + filename + " (" + strerror(errno) + ")");
     }
-    
+
     m_watchedFiles[wd] = filename;
 }
 
@@ -97,21 +109,18 @@ void FileWatcher::handleFileModify(int wd) {
             std::ifstream file(it->second);
             nlohmann::json content;
             file >> content;
-            
-            // 新增：提取纯文件名
+
+            // 添加JSON内容打印
+            std::cout << "Modified JSON content (" << it->second << "):\n"
+                      << content.dump(4) << "\n" << std::endl;
+            // 提取纯文件名
             size_t pos = it->second.find_last_of("/\\");
             std::string filename = (pos != std::string::npos) ? 
                                   it->second.substr(pos + 1) : 
                                   it->second;
             
-            // 使用纯文件名发送更新
             m_ipcManager.sendUpdate(filename, content);
-            
-            // 添加JSON内容打印
-            std::cout << "Modified JSON content (" << it->second << "):\n"
-                      << content.dump(4) << "\n" << std::endl;
-            
-            m_ipcManager.sendUpdate(it->second, content);
+
         } catch (const std::exception& e) {
             std::cerr << "Error handling file update: " << e.what() << std::endl;
         }
