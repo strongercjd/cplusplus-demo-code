@@ -8,6 +8,8 @@ namespace IPCProtocol {
         UNSUBSCRIBE,//取消订阅
         FILE_UPDATE,//文件更新
         SUBSCRIBE_RESPONSE, // 订阅响应类型
+        AUTH_REQUEST,//认证
+        AUTH_RESPONSE,//认证响应
         ERROR
     };
 
@@ -33,5 +35,19 @@ namespace IPCProtocol {
         std::string reason;
         
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(SubscribeResponse, success, reason)
+    };
+
+    // 认证请求结构
+    struct AuthRequest {
+        std::string username;
+        std::string password;
+
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE(AuthRequest, username, password)
+    };
+    // 认证响应结构
+    struct AuthResponse {
+        bool success;
+        std::string reason;
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE(AuthResponse, success, reason)
     };
 }

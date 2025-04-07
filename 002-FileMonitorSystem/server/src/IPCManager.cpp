@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 #include "FileWatcher.hpp"
+#include "AuthManager.hpp"
 
 using namespace std;
 
@@ -43,7 +44,10 @@ IPCManager::IPCManager(const string& socketPath) :
         throw runtime_error("Failed to listen on socket");
     }
 }
-
+/**
+ * @brief 启动IPCManager,开始监听客户端连接 
+ * 
+ */
 void IPCManager::start() {
     m_running = true;
     vector<thread> workers;
@@ -67,7 +71,10 @@ void IPCManager::stop() {
     close(m_serverFd);
     unlink(m_socketPath.c_str());
 }
-
+/**
+ * @brief 处理客户端连接 
+ * 
+ */
 void IPCManager::handleClientConnection() {
     struct sockaddr_un client_addr;
     socklen_t client_len = sizeof(client_addr);
@@ -100,6 +107,8 @@ void IPCManager::handleClientConnection() {
             } catch (const exception& e) {
                 std::cerr << "Message parse error: " << e.what() << std::endl;
             }
+            // 清空buffer
+            memset(buffer, 0, sizeof(buffer));
         }
         close(client_fd);
     }).detach();// 分离线程
@@ -119,7 +128,12 @@ void IPCManager::handleClientConnection() {
       * 线程内部已妥善处理了client_fd的关payload闭操作
     */
 }
-
+/**
+ * @brief 处理客户端消息
+ * 
+ * @param msg 消息析后的消息对象
+ * @param client_fd 客户端fd 
+ */
 void IPCManager::handleMessage(const IPCProtocol::Message& msg, int client_fd) {
     switch(msg.type) {
         case IPCProtocol::MessageType::SUBSCRIBE: {
@@ -160,6 +174,29 @@ void IPCManager::handleMessage(const IPCProtocol::Message& msg, int client_fd) {
             m_subManager.removeSubscription(filename, client_fd);
             break;
         }
+        case IPCProtocol::MessageType::AUTH_REQUEST: {
+            string username = msg.payload["username"];
+            string password = msg.payload["password"];
+            IPCProtocol::AuthResponse resp;
+            // 验证凭据
+            if (m_authManager.validateCredentials(username, password)) {
+                // 发送成功响应
+                resp = {true, ""};
+                //存储客户端验证成功的client_fd
+                setClientAuthStatus(client_fd, true);
+            }else {
+                // 发送失败响应
+                resp = {false, "Authentication failed"};
+                setClientAuthStatus(client_fd, false);
+            }
+            IPCProtocol::Message responseMsg{
+                IPCProtocol::MessageType::AUTH_RESPONSE,
+                resp
+            };
+            string data = nlohmann::json(responseMsg).dump();
+            write(client_fd, data.c_str(), data.size());
+            break;
+        }
         default:
             std::cerr << "Unhandled message type" << std::endl;
     }
@@ -195,4 +232,23 @@ void IPCManager::sendUpdate(const string& filename, const nlohmann::json& conten
 void IPCManager::bindFileWatcher(FileWatcher& fileWatcher) 
 {
     m_fileWatcher = &fileWatcher;
+}
+/**
+ * @brief 设置客户端验证状态
+ * 
+ * @param clientId 客户端id
+ * @param isAuthenticated 状态
+ */
+void IPCManager::setClientAuthStatus(int clientId, bool isAuthenticated) {
+    m_authenticatedClients[clientId] = isAuthenticated;
+}
+/**
+ * @brief 获取客户端验证状态
+ * 
+ * @param clientId 客户端id
+ * @return true 
+ * @return false 
+ */
+bool IPCManager::isClientAuthenticated(int clientId) {
+    return m_authenticatedClients.find(clientId) != m_authenticatedClients.end();
 }

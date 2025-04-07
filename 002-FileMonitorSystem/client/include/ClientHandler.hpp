@@ -15,6 +15,8 @@ public:
     void unsubscribe(const std::string& filename);
     void startListening(UpdateCallback callback);
     void stop();
+    void start(const std::string& filename);
+    bool isRunning()const;
 
 private:
     std::string m_socketPath;
@@ -22,4 +24,5 @@ private:
     bool m_running;
     std::thread m_listenerThread;
     UpdateCallback m_callback;
+    std::string m_filename;
 };

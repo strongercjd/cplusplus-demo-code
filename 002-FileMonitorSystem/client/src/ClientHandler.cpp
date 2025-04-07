@@ -28,7 +28,32 @@ ClientHandler::ClientHandler(const std::string& socketPath) :
         throw std::runtime_error("Failed to connect to server");
     }
 }
+/**
+ * @brief 启动客户端 发送认证请求
+ * 
+ * @param filename 文件名 
+ */
+void ClientHandler::start(const std::string& filename) {
+    m_filename = filename;
+    std::string inputUser, inputPass;
+    std::cout << "请输入账户: ";
+    std::cin >> inputUser;
+    
+    std::cout << "请输入密码: ";
+    std::cin >> inputPass;
+    IPCProtocol::Message authMsg;
+    authMsg.type = IPCProtocol::MessageType::AUTH_REQUEST;
+    authMsg.payload["username"] = inputUser;
+    authMsg.payload["password"] = inputPass;
 
+    std::string authData = nlohmann::json(authMsg).dump();
+    write(m_socketFd, authData.c_str(), authData.size());
+}
+/**
+ * @brief 订阅文件 
+ * 
+ * @param filename 文件名 
+ */
 void ClientHandler::subscribe(const std::string& filename) {
     IPCProtocol::Message msg;
     msg.type = IPCProtocol::MessageType::SUBSCRIBE;
@@ -40,6 +65,11 @@ void ClientHandler::subscribe(const std::string& filename) {
     write(m_socketFd, data.c_str(), data.size());
 }
 
+/**
+ * @brief 取消订阅
+ * 
+ * @param callback filename 文件名
+ */
 void ClientHandler::unsubscribe(const std::string& filename) {
     IPCProtocol::Message msg;
     msg.type = IPCProtocol::MessageType::UNSUBSCRIBE;
@@ -48,7 +78,11 @@ void ClientHandler::unsubscribe(const std::string& filename) {
     std::string data = nlohmann::json(msg).dump();
     write(m_socketFd, data.c_str(), data.size());
 }
-
+/**
+ * @brief 开始监听
+ * 
+ * @param callback 文件更新回调函数
+ */
 void ClientHandler::startListening(UpdateCallback callback) {
     m_running = true;
     m_callback = callback;
@@ -68,21 +102,42 @@ void ClientHandler::startListening(UpdateCallback callback) {
             try {
                 auto msg = nlohmann::json::parse(buffer, buffer + count);
                 auto protocolMsg = msg.get<IPCProtocol::Message>();
-                
-                if (protocolMsg.type == IPCProtocol::MessageType::FILE_UPDATE) {
+
+                switch (protocolMsg.type)
+                {
+                case IPCProtocol::MessageType::FILE_UPDATE:{
                     auto update = protocolMsg.payload.get<IPCProtocol::FileUpdate>();
                     if (m_callback) {
                         m_callback(update.filename, update.content);
                     }
+                    break;
                 }
-                // 消息处理部分
-                if (protocolMsg.type == IPCProtocol::MessageType::SUBSCRIBE_RESPONSE) {
+                case IPCProtocol::MessageType::SUBSCRIBE_RESPONSE:{
                     auto resp = protocolMsg.payload.get<IPCProtocol::SubscribeResponse>();
                     if (resp.success) {
                         std::cout << "Subscribe success " << std::endl;
                     } else {
                         std::cerr << "Subscribe failed: " << resp.reason << std::endl;
                     }
+                    break;
+                }
+                case IPCProtocol::MessageType::AUTH_RESPONSE:{
+                    auto resp = protocolMsg.payload.get<IPCProtocol::AuthResponse>();
+                    if (resp.success) {
+                        std::cout << "🎉 Auth success " << std::endl;
+                        // 认证成功，开始订阅文件
+                        if (!m_filename.empty()) {
+                            subscribe(m_filename);
+                        }
+                    }else{
+                        // 认证失败，退出程序
+                        std::cerr << "❌ Auth failed: " << resp.reason << std::endl;
+                        m_running = false;
+                        break;
+                    }
+                }
+                default:
+                    break;
                 }
             } catch (const std::exception& e) {
                 std::cerr << "Error processing message: " << e.what() << std::endl;
@@ -90,11 +145,24 @@ void ClientHandler::startListening(UpdateCallback callback) {
         }
     });
 }
-
+/**
+ * @brief 停止监听
+ * 
+ */
 void ClientHandler::stop() {
     m_running = false;
+    shutdown(m_socketFd, SHUT_RDWR); // 强制中断阻塞的read调用
     if (m_listenerThread.joinable()) {
         m_listenerThread.join();
     }
     close(m_socketFd);
+}
+/**
+ * @brief 检查是否正在运行
+ * 
+ * @return true 
+ * @return false 
+ */
+bool ClientHandler::isRunning() const {
+    return m_running;
 }

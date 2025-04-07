@@ -13,6 +13,7 @@ add_executable(ipc_server
     src/IPCManager.cpp
     src/FileWatcher.cpp
     src/SubscriptionManager.cpp
+    src/AuthManager.cpp
 )
 
 target_include_directories(ipc_server PRIVATE

@@ -4,19 +4,14 @@
 
 void SubscriptionManager::addSubscription(const std::string& filename, int client_fd) {
     std::lock_guard<std::mutex> lock(m_mutex);
-    m_subscriptions[filename].insert(client_fd);
-
-    // 打印m_subscriptions所有内容
-    // std::cout << "m_subscriptions: " << std::endl;
-    // for (const auto& [filename, value] : m_subscriptions) {
-    //     // 打印filename和value
-    //     for (int fd : value) {
-    //         std::cout << "Key: " << filename << ", client id: "<<fd<<std::endl;
-    //     }
-    // }
-    
+    m_subscriptions[filename].insert(client_fd);    
 }
-
+/**
+ * @brief 移除订阅者 
+ * 
+ * @param filename 文件名
+ * @param client_fd 订阅者fd
+ */
 void SubscriptionManager::removeSubscription(const std::string& filename, int client_fd) {
     std::lock_guard<std::mutex> lock(m_mutex);
     auto it = m_subscriptions.find(filename);
@@ -27,7 +22,12 @@ void SubscriptionManager::removeSubscription(const std::string& filename, int cl
         }
     }
 }
-
+/**
+ * @brief 获取订阅者列表 
+ * 
+ * @param filename 文件名
+ * @return std::set<int> 订阅者列表 
+ */
 std::set<int> SubscriptionManager::getSubscribers(const std::string& filename) {
     std::lock_guard<std::mutex> lock(m_mutex);
     auto it = m_subscriptions.find(filename);

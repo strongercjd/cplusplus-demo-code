@@ -10,8 +10,6 @@
 #include <sys/inotify.h>
 #include <stdexcept>
 
-#define BUF_LEN (1024 * (sizeof(struct inotify_event) + 16))
-
 #define EVENT_SIZE  (sizeof(struct inotify_event))
 #define BUF_LEN     (1024 * (EVENT_SIZE + 16))
 
@@ -27,7 +25,13 @@ FileWatcher::FileWatcher(IPCManager& ipcManager) :
 FileWatcher::~FileWatcher() {
     stop();
 }
-
+/**
+ * @brief 是否正在监听文件
+ * 
+ * @param filename 文件名
+ * @return true 
+ * @return false 
+ */
 bool FileWatcher::isWatching(const std::string& filename) 
 {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -41,6 +45,12 @@ bool FileWatcher::isWatching(const std::string& filename)
     }
     return false;
 }
+/**
+ * @brief 添加文件监听
+ *
+ * @param filename 文件名
+ *
+ */
 void FileWatcher::addWatch(const std::string& filename) {
     std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -56,7 +66,10 @@ void FileWatcher::addWatch(const std::string& filename) {
 
     m_watchedFiles[wd] = filename;
 }
-
+/**
+ * @brief 开始文件监听 
+ * 
+ */
 void FileWatcher::start() {
     m_running = true;
     std::thread([this]() {
@@ -88,7 +101,10 @@ void FileWatcher::start() {
         }
     }).detach();
 }
-
+/**
+ * @brief 停止文件监听 
+ * 
+ */
 void FileWatcher::stop() {
     m_running = false;
     
@@ -100,7 +116,11 @@ void FileWatcher::stop() {
     
     close(m_inotifyFd);
 }
-
+/**
+ * @brief 处理文件修改事件 
+ * 
+ * @param wd 文件描述符 
+ */
 void FileWatcher::handleFileModify(int wd) {
     std::lock_guard<std::mutex> lock(m_mutex);
     auto it = m_watchedFiles.find(wd);
@@ -118,9 +138,13 @@ void FileWatcher::handleFileModify(int wd) {
             std::string filename = (pos != std::string::npos) ? 
                                   it->second.substr(pos + 1) : 
                                   it->second;
-            
-            m_ipcManager.sendUpdate(filename, content);
 
+            if(m_ipcManager.isClientAuthenticated(wd))// 检查客户端是否已认证
+            {
+                m_ipcManager.sendUpdate(filename, content);
+            }else{
+                std::cout << "Client not authenticated, skipping update." << std::endl;
+            }
         } catch (const std::exception& e) {
             std::cerr << "Error handling file update: " << e.what() << std::endl;
         }
