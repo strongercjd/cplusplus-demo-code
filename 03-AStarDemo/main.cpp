@@ -7,6 +7,15 @@
 
 using namespace std;
 
+
+// 对于map访问，修改为左下角为原点，向右为X正方向，向上为Y的正方向，坐标从0开始
+struct MapInfo
+{
+    int width;
+    int height;
+    vector<int> data;// 0表示可通行，1～100表示障碍物 -1表示未知
+};
+
 // 定义节点结构体
 struct Node {
     int x, y;
@@ -28,12 +37,12 @@ struct CompareNode {
     }
 };
 
-vector<pair<int, int>> AStar(vector<vector<int>>& grid, 
+vector<pair<int, int>> AStar(MapInfo& grid, 
                             int startX, int startY, 
                             int endX, int endY) {
-    int rows = grid.size();
-    int cols = grid[0].size();
-    
+    int rows = grid.height;// 行数，即Y方向的长度
+    int cols = grid.width;// 列数，即X方向的长度
+
     // 创建起点和终点
     Node* start = new Node(startX, startY);
     Node* end = new Node(endX, endY);
@@ -73,11 +82,12 @@ vector<pair<int, int>> AStar(vector<vector<int>>& grid,
         for (int i = 0; i < 4; ++i) {
             int newX = current->x + dx[i];
             int newY = current->y + dy[i];
+            int index   = (rows - 1 - newY) * cols + newX;
             
             // 检查边界条件和障碍物
             if (newX >= 0 && newX < cols &&   // X范围是[0,cols-1]
                 newY >= 0 && newY < rows &&   // Y范围是[0,rows-1]
-                grid[rows - 1 - newY][newX] == 0)  {
+                grid.data[index] == 0)  {
                 
                 Node* neighbor = new Node(newX, newY);
                 neighbor->parent = current;
@@ -102,34 +112,38 @@ vector<pair<int, int>> AStar(vector<vector<int>>& grid,
 
 // 测试代码
 int main() {
-    // 0表示可通行，1表示障碍物
-    //对于grid访问，修改为左下角为原点，向右为X正方向，向上为Y的正方向
-    // 例如，grid[1][2]表示地图上的(2,3)点
-    vector<vector<int>> grid = {
-        {0, 0, 0, 0, 0},
-        {0, 1, 1, 1, 0},
-        {0, 0, 0, 1, 0},
-        {0, 1, 1, 0, 0},
-        {0, 0, 0, 1, 0}
-    };
     
-    vector<pair<int, int>> path = AStar(grid, 2, 2, 3, 1);
+    MapInfo map_grid ;
+    map_grid.width = 5;
+    map_grid.height = 5;
+    map_grid.data = {0, 0, 0, 0, 0,
+                     0, 1, 1, 1, 0,
+                     0, 0, 0, 1, 0,
+                     0, 1, 1, 0, 0,
+                     0, 0, 0, 1, 0};
+    
+    vector<pair<int, int>> path = AStar(map_grid, 2, 2, 3, 1);
     //打印地图，路径上的点用*表示
     if(path.empty() == false)
     {
         cout << "Map:" << endl;
-        for (int i = 0; i < grid.size(); i++) {
-            for (int j = 0; j < grid[0].size(); j++) {
+        for (int i = 0; i < map_grid.height; i++) {
+            for (int j = 0; j < map_grid.width; j++) {
                 int x = j;
-                int y = grid.size() - 1 - i;
-                if (grid[i][j] == 1) {
-                    cout << "1 ";
-                }   
-                else if (find(path.begin(), path.end(), make_pair(x, y)) != path.end()) {
+                int y = map_grid.height - 1 - i;
+                int index   = y * map_grid.width + x;
+                if (find(path.begin(), path.end(), make_pair(x, y)) != path.end())
+                {
                     cout << "* ";
-                }   
-                else {
-                    cout << "0 ";
+                }
+                else
+                {
+                    if (map_grid.data[index] == 1)
+                    {
+                        cout << "1 ";
+                    }
+                    else
+                        cout << "0 ";
                 }
             }
             cout << endl;
