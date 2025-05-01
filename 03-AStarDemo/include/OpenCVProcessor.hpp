@@ -5,8 +5,10 @@
 
 class OpenCVProcessor
 {
-public: 
+public:
     void drawMapWithOpenCV(const MapInfo &map_grid,
                            const std::vector<std::pair<int, int>> &path,
                            int cell_size = 50);
+    void drawSaveButton(cv::Mat &img);
+    static void saveButtonHandler(int event, int x, int y, int flags, void* userdata);
 };
