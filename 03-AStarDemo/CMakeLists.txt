@@ -8,6 +8,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)# 强制使用指定的c++版本
 find_package(OpenCV 4.2.0 REQUIRED) # 查找OpenCV库
 include_directories(${OpenCV_INCLUDE_DIRS}) # 包含OpenCV头文件目录
 
-add_executable(AStarDemo src/main.cpp) # 添加可执行文件
+# 头文件的路径
+include_directories(
+    include
+)
+
+add_executable(AStarDemo # 添加可执行文件
+main.cpp
+src/AStar.cpp
+src/OpenCVProcessor.cpp
+) 
 target_link_libraries(AStarDemo ${OpenCV_LIBS}) # 链接OpenCV库
 
