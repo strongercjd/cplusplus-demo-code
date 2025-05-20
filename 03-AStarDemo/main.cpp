@@ -13,7 +13,7 @@ int main()
     AStar AStarPath;
     OpenCVProcessor imageProcessor;
 
-    std::vector<std::pair<int, int>> path = AStarPath.findPath(map_grid, 2, 2, 20, 50);
+    std::vector<std::pair<int, int>> path = AStarPath.findPath(map_grid, 2, 15, 20, 80);
     // 打印地图，路径上的点用*表示
     if (path.empty() == false)
     {

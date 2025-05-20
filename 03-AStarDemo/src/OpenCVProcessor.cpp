@@ -1,5 +1,9 @@
 #include "OpenCVProcessor.hpp"
-
+/**
+ * @brief 绘制保存按钮
+ * 
+ * @param img 要绘制按钮的图像
+ */
 void OpenCVProcessor::drawSaveButton(cv::Mat &img)
 {
     // 在图像右下角绘制按钮
@@ -8,14 +12,24 @@ void OpenCVProcessor::drawSaveButton(cv::Mat &img)
     cv::putText(img, "Save Map", cv::Point(img.cols - 110, 30),
                 cv::FONT_HERSHEY_SIMPLEX, 0.7, cv::Scalar(0, 0, 0), 2);
 }
-void OpenCVProcessor::mapClickHandler(int event, int x, int y, int, void *userdata)
+/**
+ * @brief 处理地图点击事件
+ * 
+ * @param event 鼠标事件
+ * @param x 鼠标点击位置的x坐标
+ * @param y 鼠标点击位置的y坐标
+ * @param flags 鼠标事件标志
+ * @param userdata 用户数据指针
+ */
+void OpenCVProcessor::mapClickHandler(int event, int x, int y, int flags, void *userdata)
 {
-    auto &map_grid = *static_cast<MapInfo *>(userdata);
+    auto &ctx = *static_cast<MouseContext *>(userdata); // 获取完整上下文
+    auto &map_grid = *ctx.mapData;
 
     if (event == cv::EVENT_LBUTTONDOWN)
     {
         // 转换坐标到网格系统
-        int cell_size = 50; // 需要与实际cell_size同步
+        int cell_size = ctx.cell_size;
         int grid_x = x / cell_size;
         int grid_y = (map_grid.height - 1) - (y / cell_size); // 转换Y轴方向
 
@@ -23,12 +37,20 @@ void OpenCVProcessor::mapClickHandler(int event, int x, int y, int, void *userda
         if (grid_x >= 0 && grid_x < map_grid.width &&
             grid_y >= 0 && grid_y < map_grid.height)
         {
-
             int index = grid_y * map_grid.width + grid_x;
             map_grid.data[index] = 1 - map_grid.data[index]; // 切换状态
         }
     }
 }
+/**
+ * @brief 处理保存按钮点击事件
+ *
+ * @param event 鼠标事件
+ * @param x 鼠标点击位置的x坐标
+ * @param y 鼠标点击位置的y坐标
+ * @param flags 鼠标事件标志
+ * @param userdata 用户数据指针
+ */
 void OpenCVProcessor::saveButtonHandler(int event, int x, int y, int, void *userdata)
 {
     cv::Mat *img_ptr = static_cast<cv::Mat *>(userdata);
@@ -98,25 +120,28 @@ void OpenCVProcessor::drawMapWithOpenCV(MapInfo &map_grid,
                                         const std::vector<std::pair<int, int>> &path,
                                         int cell_size)
 {
-    // 创建彩色图像（每个格子50x50像素）
+    // 创建彩色图像（每个格子50x50像素） 地图
     cv::Mat map_img(map_grid.height * cell_size,
                     map_grid.width * cell_size,
                     CV_8UC3,
                     cv::Scalar(255, 255, 255)); // 初始化为白色
+    // 创建UI图像
     cv::Mat ui_img(map_grid.height * cell_size,
                    map_grid.width * cell_size,
                    CV_8UC3,
                    cv::Scalar(255, 255, 255)); // 初始化为白色
 
+    this->cell_size = cell_size; // 设置格子大小
+
 
     cv::namedWindow("A* Path Planning");
     cv::setMouseCallback("A* Path Planning", [](int event, int x, int y, int flags, void *userdata)
                          {
-                             auto context = static_cast<std::pair<MapInfo *, cv::Mat *> *>(userdata);
-                             saveButtonHandler(event, x, y, flags, context->second); // 处理保存按钮
-                             mapClickHandler(event, x, y, flags, context->first);    // 处理地图点击
+                             auto ctx = static_cast<MouseContext *>(userdata);
+                             saveButtonHandler(event, x, y, flags, ctx->mapImage); // 处理保存按钮点击事件
+                             mapClickHandler(event, x, y, flags, ctx);    // 处理地图点击事件
                          },
-                         new std::pair<MapInfo*, cv::Mat*>(&map_grid, &map_img)); // 需要维护这个指针
+                         new MouseContext{&map_grid, &map_img,cell_size});
 
     // 修改显示循环
     while (true)

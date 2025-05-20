@@ -18,8 +18,8 @@ std::vector<std::pair<int, int>> AStar::findPath(MapInfo &grid,
     start->h = heuristic(start, end);
 
     // 开放列表和闭合列表
-    std::priority_queue<Node *, std::vector<Node *>, CompareNode> openList;
-    std::set<std::pair<int, int>> closedList;
+    std::priority_queue<Node *, std::vector<Node *>, CompareNode> openList;// 优先队列，用于存储待探索的节点
+    std::set<std::pair<int, int>> closedList;// 集合，用于存储已探索的节点
 
     // 四个方向：上下左右
     int dx[] = {1, -1, 0, 0};
@@ -29,8 +29,8 @@ std::vector<std::pair<int, int>> AStar::findPath(MapInfo &grid,
 
     while (!openList.empty())
     {
-        Node *current = openList.top();
-        openList.pop();
+        Node *current = openList.top();// 取出开放列表中代价最小的节点
+        openList.pop();// 弹出该节点
 
         // 将当前节点加入闭合列表
         closedList.insert({current->x, current->y});
@@ -44,7 +44,7 @@ std::vector<std::pair<int, int>> AStar::findPath(MapInfo &grid,
                 path.emplace_back(current->x, current->y);
                 current = current->parent;
             }
-            std::reverse(path.begin(), path.end());
+            std::reverse(path.begin(), path.end());// 反转路径，使其从起点到终点
             return path;
         }
 
@@ -53,12 +53,12 @@ std::vector<std::pair<int, int>> AStar::findPath(MapInfo &grid,
         {
             int newX = current->x + dx[i];
             int newY = current->y + dy[i];
-            int index = (rows - 1 - newY) * cols + newX;
+            int index = (rows - 1 - newY) * cols + newX;// 计算在一维数组中的索引
 
             // 检查边界条件和障碍物
             if (newX >= 0 && newX < cols && // X范围是[0,cols-1]
                 newY >= 0 && newY < rows && // Y范围是[0,rows-1]
-                grid.data[index] == 0)
+                grid.data[index] == 0)//不是障碍物
             {
 
                 Node *neighbor = new Node(newX, newY);
