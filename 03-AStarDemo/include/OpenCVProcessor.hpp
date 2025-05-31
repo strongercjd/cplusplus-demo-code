@@ -19,9 +19,13 @@ public:
     static void saveButtonHandler(int event, int x, int y, int flags, void *userdata);
     static void mapClickHandler(int event, int x, int y, int flags,void *userdata);
 
-    void redrawMap(cv::Mat &map_img, MapInfo &map_grid,
-                   const std::vector<std::pair<int, int>> &path,
-                   int cell_size);
+    void drawMap(cv::Mat &map_img, MapInfo &map_grid,
+        int cell_size);
+    void drawGridMap(cv::Mat &map_img, MapInfo &map_grid,
+                     int cell_size);
+    void drawPathMap(cv::Mat &path_img, MapInfo &map_grid,
+                     const std::vector<std::pair<int, int>> &path,
+                     int cell_size);
 
 private:
     int cell_size = 50; // 每个格子的大小
