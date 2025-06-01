@@ -12,6 +12,7 @@ void OpenCVProcessor::drawSaveButton(cv::Mat &img)
     cv::putText(img, "save", cv::Point(img.cols - 110, 30),
                 cv::FONT_HERSHEY_SIMPLEX, 0.7, cv::Scalar(0, 0, 0), 2);
 }
+
 void OpenCVProcessor::processGridClick(int x, int y, MouseContext &ctx, MapInfo &map_grid)
 {
     int cell_size = ctx.cell_size;
@@ -70,14 +71,16 @@ void OpenCVProcessor::mapClickHandler(int event, int x, int y, int flags, void *
  */
 void OpenCVProcessor::saveButtonHandler(int event, int x, int y, int, void *userdata)
 {
-    cv::Mat *img_ptr = static_cast<cv::Mat *>(userdata);
+    auto &ctx = *static_cast<MouseContext *>(userdata);
+    auto mapimg_ptr = ctx.mapImage;
+    auto disimg_ptr = ctx.displayImage;
     if (event == cv::EVENT_LBUTTONDOWN)
     {
         // 检查是否点击按钮区域（右下角110x30区域）
-        if (x > (*img_ptr).cols - 120 && x < (*img_ptr).cols - 10 &&
+        if (x > (*disimg_ptr).cols - 120 && x < (*disimg_ptr).cols - 10 &&
             y > 10 && y < 40)
         {
-            cv::imwrite("map.png", *img_ptr);
+            cv::imwrite("map.png", *mapimg_ptr);
             std::cout << "Map saved to map.png" << std::endl;
         }
     }
@@ -145,6 +148,13 @@ void OpenCVProcessor::drawMapWithOpenCV(MapInfo &map_grid,
                     map_grid.width * cell_size,
                     CV_8UC3,
                     cv::Scalar(255, 255, 255)); // 初始化为白色
+
+    // 显示时扩展画布（右侧增加50像素）
+    cv::Mat display_img;
+    cv::copyMakeBorder(map_img, display_img,
+                       0, 0,  // 上下不扩展
+                       0, 100, // 右侧扩展100像素
+                       cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255));
     // 创建UI图像
     cv::Mat grid_img = map_img.clone();
     cv::Mat ui_img = map_img.clone();
@@ -156,10 +166,10 @@ void OpenCVProcessor::drawMapWithOpenCV(MapInfo &map_grid,
     cv::setMouseCallback("A* Path Planning", [](int event, int x, int y, int flags, void *userdata)
                          {
                              auto ctx = static_cast<MouseContext *>(userdata);
-                             saveButtonHandler(event, x, y, flags, ctx->mapImage); // 处理保存按钮点击事件
+                             saveButtonHandler(event, x, y, flags, ctx); // 处理保存按钮点击事件
                              mapClickHandler(event, x, y, flags, ctx);             // 处理地图点击事件
                          },
-                         new MouseContext{&map_grid, &map_img, cell_size});
+                         new MouseContext{&map_grid, &map_img, &display_img, cell_size});
     map_img.setTo(cv::Scalar(255, 255, 255)); // 重置为白色
     // 修改显示循环
     while (true)
@@ -172,10 +182,11 @@ void OpenCVProcessor::drawMapWithOpenCV(MapInfo &map_grid,
         path_img = grid_img.clone();
         drawPathMap(path_img, map_grid, path, cell_size);
 
-        ui_img = path_img.clone();
-        drawSaveButton(ui_img);
+        // 将路径图像复制到显示图像的左侧区域
+        path_img.copyTo(display_img(cv::Rect(0, 0, path_img.cols, path_img.rows)));
+        drawSaveButton(display_img); // 在显示图像上绘制按钮
 
-        cv::imshow("A* Path Planning", ui_img);
+        cv::imshow("A* Path Planning", display_img);
         int key = cv::waitKey(30);
         if (key == 27)
             break;

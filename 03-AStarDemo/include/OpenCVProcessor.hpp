@@ -11,10 +11,11 @@ public:
     public:
         MapInfo *mapData;        // 地图网格数据指针
         cv::Mat *mapImage;       // 可交互地图图像
+        cv::Mat *displayImage;
         int cell_size;           // 每个格子的大小
         bool isDragging = false; // 拖动状态标志
-        MouseContext(MapInfo *data, cv::Mat *img, int size)
-            : mapData(data), mapImage(img), cell_size(size) {}
+        MouseContext(MapInfo *data, cv::Mat *mapimg,cv::Mat *disimg, int size)
+            : mapData(data), mapImage(mapimg),displayImage(disimg), cell_size(size) {}
     };
     void drawMapWithOpenCV(MapInfo &map_grid,
                            const std::vector<std::pair<int, int>> &path,
