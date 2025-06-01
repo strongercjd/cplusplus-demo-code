@@ -12,6 +12,19 @@ void OpenCVProcessor::drawSaveButton(cv::Mat &img)
     cv::putText(img, "save", cv::Point(img.cols - 110, 30),
                 cv::FONT_HERSHEY_SIMPLEX, 0.7, cv::Scalar(0, 0, 0), 2);
 }
+void OpenCVProcessor::processGridClick(int x, int y, MouseContext &ctx, MapInfo &map_grid)
+{
+    int cell_size = ctx.cell_size;
+    int grid_x = x / cell_size;
+    int grid_y = (map_grid.height - 1) - (y / cell_size);
+
+    if (grid_x >= 0 && grid_x < map_grid.width &&
+        grid_y >= 0 && grid_y < map_grid.height)
+    {
+        int index = grid_y * map_grid.width + grid_x;
+        map_grid.data[index] = 1 - map_grid.data[index];
+    }
+}
 /**
  * @brief 处理地图点击事件
  * 
@@ -23,24 +36,26 @@ void OpenCVProcessor::drawSaveButton(cv::Mat &img)
  */
 void OpenCVProcessor::mapClickHandler(int event, int x, int y, int flags, void *userdata)
 {
-    auto &ctx = *static_cast<MouseContext *>(userdata); // 获取完整上下文
+    auto &ctx = *static_cast<MouseContext *>(userdata);
     auto &map_grid = *ctx.mapData;
 
+    // 处理鼠标左键按下事件
     if (event == cv::EVENT_LBUTTONDOWN)
     {
-        // 转换坐标到网格系统
-        int cell_size = ctx.cell_size;
-        int grid_x = x / cell_size;
-        int grid_y = (map_grid.height - 1) - (y / cell_size); // 转换Y轴方向
-
-        // 边界检查
-        if (grid_x >= 0 && grid_x < map_grid.width &&
-            grid_y >= 0 && grid_y < map_grid.height)
+        ctx.isDragging = true; // 设置拖动标志
+        processGridClick(x, y, ctx, map_grid);
+    }
+    // 处理鼠标左键释放事件
+    else if (event == cv::EVENT_LBUTTONUP)
+    {
+        ctx.isDragging = false; // 清除拖动标志
+    }
+    // 处理鼠标移动事件
+    else if (event == cv::EVENT_MOUSEMOVE)
+    {
+        if (ctx.isDragging) // 只有在拖动状态下处理
         {
-            int index = grid_y * map_grid.width + grid_x;
-            //打印index
-            std::cout << "index:" << index << std::endl;
-            map_grid.data[index] = 1 - map_grid.data[index]; // 切换状态
+            processGridClick(x, y, ctx, map_grid);
         }
     }
 }
@@ -70,6 +85,7 @@ void OpenCVProcessor::saveButtonHandler(int event, int x, int y, int, void *user
 
 void OpenCVProcessor::drawMap(cv::Mat &map_img, MapInfo &map_grid, int cell_size)
 {
+    map_img.setTo(cv::Scalar(255, 255, 255));
     for (int y = 0; y < map_grid.height; ++y)
     {
         for (int x = 0; x < map_grid.width; ++x)
