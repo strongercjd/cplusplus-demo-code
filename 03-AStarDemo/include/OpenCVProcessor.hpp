@@ -13,7 +13,7 @@ public:
         cv::Mat *mapImage;       // 可交互地图图像
         cv::Mat *displayImage;
         int cell_size;           // 每个格子的大小
-        bool isDragging = false; // 拖动状态标志
+        int isDragging = 0; // 拖动状态标志
         MouseContext(MapInfo *data, cv::Mat *mapimg,cv::Mat *disimg, int size)
             : mapData(data), mapImage(mapimg),displayImage(disimg), cell_size(size) {}
     };
@@ -32,7 +32,7 @@ public:
                      const std::vector<std::pair<int, int>> &path,
                      int cell_size);
 
-    static void processGridClick(int x, int y, MouseContext &ctx, MapInfo &map_grid);
+    static void processGridClick(int x, int y, MouseContext &ctx, MapInfo &map_grid,int flg);
 
 private:
     int cell_size = 50; // 每个格子的大小

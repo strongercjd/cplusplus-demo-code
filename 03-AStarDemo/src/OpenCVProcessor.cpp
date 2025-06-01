@@ -13,7 +13,7 @@ void OpenCVProcessor::drawSaveButton(cv::Mat &img)
                 cv::FONT_HERSHEY_SIMPLEX, 0.7, cv::Scalar(0, 0, 0), 2);
 }
 
-void OpenCVProcessor::processGridClick(int x, int y, MouseContext &ctx, MapInfo &map_grid)
+void OpenCVProcessor::processGridClick(int x, int y, MouseContext &ctx, MapInfo &map_grid,int flg)
 {
     int cell_size = ctx.cell_size;
     int grid_x = x / cell_size;
@@ -23,7 +23,14 @@ void OpenCVProcessor::processGridClick(int x, int y, MouseContext &ctx, MapInfo 
         grid_y >= 0 && grid_y < map_grid.height)
     {
         int index = grid_y * map_grid.width + grid_x;
-        map_grid.data[index] = 1 - map_grid.data[index];
+        if (flg== 1)//左键
+        {
+            map_grid.data[index] = 1;
+        }
+        if (flg== 2)//右键
+        {
+            map_grid.data[index] = 0;
+        }
     }
 }
 /**
@@ -41,22 +48,29 @@ void OpenCVProcessor::mapClickHandler(int event, int x, int y, int flags, void *
     auto &map_grid = *ctx.mapData;
 
     // 处理鼠标左键按下事件
-    if (event == cv::EVENT_LBUTTONDOWN)
+    if ((event == cv::EVENT_LBUTTONDOWN)||(event == cv::EVENT_RBUTTONDOWN))
     {
-        ctx.isDragging = true; // 设置拖动标志
-        processGridClick(x, y, ctx, map_grid);
+        if (event == cv::EVENT_LBUTTONDOWN)
+        {
+            ctx.isDragging = 1; // 设置拖动标志
+        }
+        else
+        {
+            ctx.isDragging = 2; // 设置拖动标志
+        }
+        processGridClick(x, y, ctx, map_grid,ctx.isDragging);
     }
     // 处理鼠标左键释放事件
-    else if (event == cv::EVENT_LBUTTONUP)
+    else if ((event == cv::EVENT_LBUTTONUP)||(event == cv::EVENT_RBUTTONUP))
     {
-        ctx.isDragging = false; // 清除拖动标志
+        ctx.isDragging = 0; // 清除拖动标志
     }
     // 处理鼠标移动事件
     else if (event == cv::EVENT_MOUSEMOVE)
     {
         if (ctx.isDragging) // 只有在拖动状态下处理
         {
-            processGridClick(x, y, ctx, map_grid);
+            processGridClick(x, y, ctx, map_grid,ctx.isDragging);
         }
     }
 }
