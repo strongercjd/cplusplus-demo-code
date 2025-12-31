@@ -4,4 +4,5 @@
 * 02-FileMonitorSystem  基于进程间通信（IPC）的实时文件监控系统，服务器端监控文件变化并通过 Unix socket 实时推送更新给订阅的客户端
 * 03-AStarDemo A*算法的demo
 * 04-googletest gtest的演示demo
+* 05-SignalsAndSlots 使用C++ 简单实现一下类似QT的信号与槽机制
 
