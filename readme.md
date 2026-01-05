@@ -5,4 +5,5 @@
 * 03-AStarDemo A*算法的demo
 * 04-googletest gtest的演示demo
 * 05-SignalsAndSlots 使用C++ 简单实现一下类似QT的信号与槽机制
+* 06-message_bus 消息订阅/发布机制和超时回调功能的消息总线系统，用于在客户端处理异步消息通信（如C/S架构中的请求-响应），当消息在指定时间内未收到响应时会自动触发超时回调
 
