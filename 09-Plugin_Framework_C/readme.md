@@ -12,6 +12,8 @@ gcc -fPIC -shared data_processor.c -ldata_sender -L./ -o libdata_processor.so
 gcc main.c -ldata_processor -ldata_sender -L./ -o main
 ```
 
+必须先编译 libdata_sender.so 再编译 libdata_processor.so
+
 执行效果
 
 ```bash
