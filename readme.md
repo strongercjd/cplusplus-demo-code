@@ -10,3 +10,4 @@
 * 08-Dynamic_Loading 动态加载 (C语言)
 * 09-Plugin_Framework_C 使用C语言构建的动态库，插件加载框架 (C语言)
 * 10-Plugin_Framework_Plus_C 根据 09-Plugin_Framework_C 修改的完善版插件框架 (C语言)
+* 11-Dyna_Nodelet C++ 动态插件加载系统
