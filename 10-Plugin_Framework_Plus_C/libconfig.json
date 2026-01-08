@@ -1,0 +1,14 @@
+{
+    "data_sender": {
+        "libname": "libdata_sender.so",
+        "start_func": "data_sender_start"
+    },
+    "data_processor": {
+        "libname": "libdata_processor.so",
+        "start_func": "data_processor_start"
+    },
+    "data_view": {
+        "libname": "libdata_view.so",
+        "start_func": "data_view_start"
+    }
+}
