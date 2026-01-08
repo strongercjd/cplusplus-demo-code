@@ -7,9 +7,9 @@
 编译命令
 
 ```bash
-gcc -fPIC -shared data_sender.c -o libdata_sender.so
-gcc -fPIC -shared data_processor.c -ldata_sender -L./ -o libdata_processor.so
-gcc main.c -ldata_processor -ldata_sender -L./ -o main
+$ gcc -fPIC -shared data_sender.c -o libdata_sender.so
+$ gcc -fPIC -shared data_processor.c -ldata_sender -L./ -o libdata_processor.so
+$ gcc main.c -ldata_processor -ldata_sender -L./ -o main
 ```
 
 必须先编译 libdata_sender.so 再编译 libdata_processor.so
@@ -17,6 +17,7 @@ gcc main.c -ldata_processor -ldata_sender -L./ -o main
 执行效果
 
 ```bash
+$ export LD_LIBRARY_PATH="$(pwd)"
 $ ./main 
 Hello World!
 data_processor start...

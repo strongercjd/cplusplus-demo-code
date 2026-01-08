@@ -9,6 +9,7 @@ $ tree
 1 directory, 2 files
 $ gcc -shared -fPIC math.c -o libmath.so
 $ gcc -ldl main.c -o main
+$ export LD_LIBRARY_PATH="$(pwd)"
 $ ./main
 Hello World!
 Please enter a command (enter 'q' and press Enter to execute the add function, enter 'exit' to quit the program):
