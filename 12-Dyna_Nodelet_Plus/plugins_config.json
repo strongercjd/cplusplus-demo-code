@@ -1,0 +1,22 @@
+{
+    "plugins": [
+        {
+            "name": "alert",
+            "library": "./libalert_nodelet.so",
+            "config": {
+                "alert_threshold": 0.8,
+                "log_level": "INFO",
+                "enabled": true
+            }
+        },
+        {
+            "name": "job",
+            "library": "./libjob_nodelet.so",
+            "config": {
+                "job_threshold": 0.8,
+                "log_level": "INFO",
+                "timeout": 30
+            }
+        }
+    ]
+}
