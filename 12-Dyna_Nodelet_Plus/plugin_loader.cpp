@@ -77,7 +77,8 @@ public:
             if (nodelet != nullptr)
             {
                 nodelet->init();
-                std::cout << "===== 插件 " << plugin_name << " 加载成功 =====\n" << std::endl;
+                std::cout << "===== 插件 " << plugin_name << " 加载成功 =====\n"
+                          << std::endl;
                 // 存储插件实例（用于后续管理）
                 loaded_plugins_[plugin_name] = nodelet;
             }

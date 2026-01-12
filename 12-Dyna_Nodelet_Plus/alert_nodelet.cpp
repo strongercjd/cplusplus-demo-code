@@ -16,15 +16,15 @@ private:
         running_ = true;
         while (running_)
         {
-            std::cout << "[AlertNodelet] 执行告警任务... 消息总数: "<< MessagePub::getInstance().getCount() << std::endl;
+            std::cout << "[AlertNodelet] 执行告警任务... 消息总数: " << MessagePub::getInstance().getCount() << std::endl;
             std::this_thread::sleep_for(std::chrono::seconds(1));
-        } 
+        }
         std::cout << "[AlertNodelet] 告警任务线程退出" << std::endl;
     }
 
 public:
     // 构造函数：调用基类构造函数
-    AlertNodelet(const char *config, int configSize) : NodeletBase(config, configSize), running_(false){}
+    AlertNodelet(const char *config, int configSize) : NodeletBase(config, configSize), running_(false) {}
 
     ~AlertNodelet()
     {

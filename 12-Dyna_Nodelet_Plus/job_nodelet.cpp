@@ -1,6 +1,8 @@
 #include "nodelet_base.hpp"
 #include <thread>
 #include <atomic>
+#include <functional>
+#include "jobexecutor_interface.hpp"
 
 // 继承NodeletBase并实现接口
 class JobNodelet : public NodeletBase
@@ -9,6 +11,15 @@ private:
     std::thread job_thread_;
     std::atomic<bool> running_;
 
+    void job_task2()
+    {
+        std::cout << "[JobNodelet] 执行任务2...  " << std::endl;
+    }
+    void job_task3()
+    {
+        std::cout << "[JobNodelet] 执行任务3...  " << std::endl;
+    }
+
     // 任务函数
     void job_task()
     {
@@ -16,7 +27,8 @@ private:
         while (running_)
         {
             std::cout << "[JobNodelet] 执行任务...  " << std::endl;
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            JobExecutorRun();
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
         std::cout << "[JobNodelet] 任务线程退出" << std::endl;
     }
@@ -46,6 +58,8 @@ public:
         {
             std::cout << "[JobNodelet] 加载配置: " << std::string(getConfig(), getConfigSize()) << std::endl;
         }
+        JobExecutorAddJob("job2", std::bind(&JobNodelet::job_task2, this), 1000, "job2");
+        JobExecutorAddJob("job3", std::bind(&JobNodelet::job_task3, this), 1500, "job3");
         // 启动任务线程
         running_ = true;
         job_thread_ = std::thread(&JobNodelet::job_task, this);
