@@ -12,3 +12,4 @@
 * 10-Plugin_Framework_Plus_C 根据 09-Plugin_Framework_C 修改的完善版插件框架 (C语言)
 * 11-Dyna_Nodelet C++ 动态插件加载系统
 * 12-Dyna_Nodelet_Plus 基于 11-Dyna_Nodelet 增强版
+* 13-Timer 使用C++的thread实现定时器功能
