@@ -1,7 +1,11 @@
-# demo功能示例
+# readme
+
+在linux下运行
+
+## demo功能示例
 
 * 01-CommandModelFactory 这是一个基于工厂模式和命令模式的设备模型管理系统，支持通过命令行动态创建不同设备模型（A/B/C/D）并处理特定指令（AA/WS/QS/ER）
-* 02-FileMonitorSystem  基于进程间通信（IPC）的实时文件监控系统，服务器端监控文件变化并通过 Unix socket 实时推送更新给订阅的客户端
+* 02-FileMonitorSystem  基于进程间通信（IPC）的实时文件监控系统，服务器端监控文件变化并通过 Unix socket 实时推送更新给订阅的客户端 thread
 * 03-AStarDemo A*算法的demo
 * 04-googletest gtest的演示demo
 * 05-SignalsAndSlots 使用C++ 简单实现一下类似QT的信号与槽机制
@@ -13,3 +17,20 @@
 * 11-Dyna_Nodelet C++ 动态插件加载系统
 * 12-Dyna_Nodelet_Plus 基于 11-Dyna_Nodelet 增强版
 * 13-Timer 使用C++的thread实现定时器功能
+* 14-thread_msg_queue_C 使用C语言实现自定义消息队列线程间通信 pthread
+
+## IPC 进程通信
+
+* 02-FileMonitorSystem  Unix socket 进程通信
+
+## 线程通信
+
+* 14-thread_msg_queue_C 线程通信
+
+## 多线程
+
+* std::thread
+  * 02-FileMonitorSystem
+
+* pthread
+  * 14-thread_msg_queue_C
