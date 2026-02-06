@@ -10,6 +10,6 @@ gcc -fPIC -shared data_processor.c -o libdata_processor.so -Wl,--allow-shlib-und
 
 gcc -fPIC -shared data_view.c -o libdata_view.so -Wl,--allow-shlib-undefined
 
-gcc ./cjson/cJSON.c main.c -o main -Wl,--allow-shlib-undefined
+gcc ./cjson/cJSON.c main.c -o main
 
 ./main
