@@ -12,7 +12,12 @@ endif()
 
 # rectrace_main
 add_executable(rectrace_main rectrace_main.cpp backward.cpp)
+# 添加 libdw 库
+target_link_libraries(rectrace_main PRIVATE dw)
+# 定义 BACKWARD_HAS_DW=1 宏
+target_compile_definitions(rectrace_main PRIVATE BACKWARD_HAS_DW=1)
 target_include_directories(rectrace_main PRIVATE ${TEST_NEW_DIR})
+# 添加 common 编译选项
 if(COMMON_FLAGS)
   target_compile_options(rectrace_main PRIVATE ${COMMON_FLAGS})
 endif()
