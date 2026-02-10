@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.14)
+project(test_new CXX)
+
+set(CMAKE_CXX_STANDARD 11)
+
+set(TEST_NEW_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
+# 编译选项（仅 header 的不用 -g 也可，为了一致性都加）
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_COMPILER_IS_GNUCXX)
+  set(COMMON_FLAGS -Wall -Wextra -g)
+endif()
+
+# rectrace_main
+add_executable(rectrace_main rectrace_main.cpp backward.cpp)
+target_include_directories(rectrace_main PRIVATE ${TEST_NEW_DIR})
+if(COMMON_FLAGS)
+  target_compile_options(rectrace_main PRIVATE ${COMMON_FLAGS})
+endif()
