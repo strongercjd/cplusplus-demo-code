@@ -1,5 +1,7 @@
 # readme
 
+> 这个是开源项目的阅读版，[backward-cpp](https://github.com/bombela/backward-cpp "开源地址")
+
 栈帧编号越大越“老”（更早的调用），#0 是崩溃发生时的最顶层。
 
 Printer 里能用来“配置”打印行为
