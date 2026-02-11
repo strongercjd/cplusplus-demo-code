@@ -408,3 +408,17 @@ Segmentation fault (Address not mapped to object [0x2a])
 | 侧重       | 基础「能打出栈」       | 递归 + 复杂名下的正确性/稳定性   |
 
 所以：**stacktrace 测的是「最基础的栈回溯」**，**rectrace 测的是「在递归和复杂 C++ 符号下栈回溯是否仍然可靠」**。
+
+## suicide main.cpp
+
+自杀测试，主动制造一些错误，去抓取栈信息,测试都是在**主动制造**各种致命情况：
+
+| 测试 | 行为 |
+|------|------|
+| `invalid_write` | 往非法地址写 → 段错误 |
+| `invalid_read` | 从非法地址读 → 段错误 |
+| `calling_abort` | 调用 `abort()` → 进程终止 |
+| `divide_by_zero` | 除零 → 可能 SIGFPE |
+| `stackoverflow` | 无限递归 + 小栈限制 → 栈溢出 |
+
+
