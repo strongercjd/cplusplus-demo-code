@@ -283,3 +283,66 @@ printer.object = true;
 #11   Object "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2", at 0xffffffffffffffff, in 
 #10   Object "/home/jindouchen/code/cplusplus-demo-code/17-backward_cpp/build/rectrace_main", at 0x5b5750bdeea4, in _start
 ```
+
+
+## select_signals_main.cpp
+
+捕获段错误，其中 SIGSEGV 定义在 /usr/include/x86_64-linux-gnu/bits/signum-generic.h (ubuntu2404)
+
+```C
+/* ISO C99 signals.  */
+#define	SIGINT		2	/* Interactive attention signal.  */
+#define	SIGILL		4	/* Illegal instruction.  */
+#define	SIGABRT		6	/* Abnormal termination.  */
+#define	SIGFPE		8	/* Erroneous arithmetic operation.  */
+#define	SIGSEGV		11	/* Invalid access to storage.  */
+#define	SIGTERM		15	/* Termination request.  */
+
+/* Historical signals specified by POSIX. */
+#define	SIGHUP		1	/* Hangup.  */
+#define	SIGQUIT		3	/* Quit.  */
+#define	SIGTRAP		5	/* Trace/breakpoint trap.  */
+#define	SIGKILL		9	/* Killed.  */
+#define	SIGPIPE		13	/* Broken pipe.  */
+#define	SIGALRM		14	/* Alarm clock.  */
+```
+
+这段头文件定义的是 **Linux/Unix 标准信号（signal）的宏**，每个宏对应一个整数编号和简短说明。下面按“用途 + 典型触发场景”简要解读。
+
+---
+
+## 一、ISO C99 标准信号（可移植）
+
+| 宏 | 编号 | 含义与典型场景 |
+|----|------|----------------|
+| **SIGINT** | 2 | **交互式中断**。用户按 Ctrl+C 时由终端驱动发给前台进程，请求“停下来”，进程可捕获并做清理后退出。 |
+| **SIGILL** | 4 | **非法指令**。CPU 执行了无效/未定义的机器指令，常见于：损坏的可执行文件、错误的自修改代码、或在不支持某指令的 CPU 上运行。 |
+| **SIGABRT** | 6 | **异常终止**。通常由程序主动调用 `abort()` 触发（如断言失败、`std::terminate` 等），表示“程序认为发生了严重错误并主动退出”。 |
+| **SIGFPE** | 8 | **算术错误**。例如整数除零、浮点异常、溢出等，由 CPU 在运算时触发。 |
+| **SIGSEGV** | 11 | **无效存储访问**。访问了不该访问的内存（空指针解引用、越界、非法地址等），即常说的“段错误”（Segmentation fault）。 |
+| **SIGTERM** | 15 | **终止请求**。请求进程“正常退出”，例如 `kill <pid>` 默认发的就是 SIGTERM；进程应捕获并做清理后退出，区别于“强制杀死”。 |
+
+---
+
+## 二、POSIX 历史信号（常见于 Unix/Linux）
+
+| 宏 | 编号 | 含义与典型场景 |
+|----|------|----------------|
+| **SIGHUP** | 1 | **挂断**。终端断开时发给该终端关联的会话/进程（如 SSH 断开），也常被 daemon 用来“重新加载配置”。 |
+| **SIGQUIT** | 3 | **退出**。用户按 Ctrl+\ 时产生，类似 SIGINT 但默认会产生 core dump，用于调试。 |
+| **SIGTRAP** | 5 | **跟踪/断点**。调试器设置断点或单步执行时由 CPU 触发，也可由 `ptrace` 等机制产生。 |
+| **SIGKILL** | 9 | **杀死**。立即终止进程，**不可捕获、不可忽略**，用于强制结束进程（如 `kill -9`）。 |
+| **SIGPIPE** | 13 | **管道破裂**。向已关闭读端的管道/套接字写数据时产生（如对方已关闭连接），忽略后写操作会返回 EPIPE。 |
+| **SIGALRM** | 14 | **闹钟**。由 `alarm()` 或 `setitimer()` 在指定时间到达时发送，常用于超时、定时任务。 |
+
+---
+
+## 三、小结
+
+- **C99 那组**：和“程序错误/异常/退出”紧密相关（崩溃、断言、除零、段错误、用户中断、请求退出）。
+- **POSIX 那组**：和“终端/会话/调试/通信/定时”相关（挂断、Ctrl+\、断点、强制杀、管道、闹钟）。
+- 编号在不同 Unix 系统上可能略有差异，所以代码里应始终用宏名（如 `SIGSEGV`），不要写死数字。
+- 除 **SIGKILL** 和 **SIGSTOP** 外，这些信号一般都可以被进程捕获（`signal()`/`sigaction()`）或忽略，用于自定义处理或优雅退出。
+
+
+

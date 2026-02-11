@@ -21,3 +21,15 @@ target_include_directories(rectrace_main PRIVATE ${TEST_NEW_DIR})
 if(COMMON_FLAGS)
   target_compile_options(rectrace_main PRIVATE ${COMMON_FLAGS})
 endif()
+
+# select_signals_main
+add_executable(select_signals_main select_signals_main.cpp backward.cpp)
+# 添加 libdw 库
+target_link_libraries(select_signals_main PRIVATE dw)
+# 定义 BACKWARD_HAS_DW=1 宏
+target_compile_definitions(select_signals_main PRIVATE BACKWARD_HAS_DW=1)
+target_include_directories(select_signals_main PRIVATE ${TEST_NEW_DIR})
+# 添加 common 编译选项
+if(COMMON_FLAGS)
+  target_compile_options(select_signals_main PRIVATE ${COMMON_FLAGS})
+endif()
