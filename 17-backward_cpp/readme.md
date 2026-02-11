@@ -1,6 +1,20 @@
 # readme
 
-## rectrace
+栈帧编号越大越“老”（更早的调用），#0 是崩溃发生时的最顶层。
+
+Printer 里能用来“配置”打印行为
+
+| 成员 | 类型 | 默认值 | 作用 |
+|------|------|--------|------|
+| **snippet** | `bool` | `true` | 是否打印源码片段（出错行前后几行） |
+| **color_mode** | `ColorMode::type` | `ColorMode::automatic` | 输出颜色模式（自动/开/关） |
+| **address** | `bool` | `false` | 是否在源码行后显示指令地址 `[addr]` |
+| **object** | `bool` | `false` | 是否总是打印 Object 信息（二进制路径 + 地址 + 符号） |
+| **inliner_context_size** | `int` | `5` | 内联帧源码片段的上下文行数（前后各几行） |
+| **trace_context_size** | `int` | `7` | 主栈帧源码片段的上下文行数 |
+| **reverse** | `bool` | `true` | 栈帧顺序：`true` 为“最晚调用在前”（常见崩溃打印顺序），`false` 为从 main 往上的顺序 |
+
+## rectrace_main.cpp
 
 栈回朔示例代码。
 
@@ -230,4 +244,42 @@ Stack trace (most recent call last):
         862: }
         863: 
         864: } // namespace details
+```
+
+关于object
+
+```cpp
+printer.object = true;
+```
+
+如果为true，就会打印如下,存在Object
+
+```bash
+#7    Object "/home/jindouchen/code/cplusplus-demo-code/17-backward_cpp/build/rectrace_main", at 0x62faaf14d0d2, in main
+      Source "/home/jindouchen/code/cplusplus-demo-code/17-backward_cpp/rectrace_main.cpp", line 64, in main
+         61:   2. 在 level <= 1 时调用 end_of_our_journey(st) 并在那时加载栈。*/
+         62:   std::cout << "--- rec recursive ---" << std::endl;
+         63:   const int input = 3;
+      >  64:   int r = toto::titi::foo::bar::trampoline(st, input);
+         65: 
+         66:   std::cout << "rec(" << input << ") == " << r << std::endl;
+```
+
+如果为false表示，就不会输出Object
+
+```bash
+#7    Source "/home/jindouchen/code/cplusplus-demo-code/17-backward_cpp/rectrace_main.cpp", line 64, in main
+         61:   2. 在 level <= 1 时调用 end_of_our_journey(st) 并在那时加载栈。*/
+         62:   std::cout << "--- rec recursive ---" << std::endl;
+         63:   const int input = 3;
+      >  64:   int r = toto::titi::foo::bar::trampoline(st, input);
+         65: 
+         66:   std::cout << "rec(" << input << ") == " << r << std::endl;
+```
+
+当然有些没有源码位置的，还是会输出 Object
+
+```bash
+#11   Object "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2", at 0xffffffffffffffff, in 
+#10   Object "/home/jindouchen/code/cplusplus-demo-code/17-backward_cpp/build/rectrace_main", at 0x5b5750bdeea4, in _start
 ```
