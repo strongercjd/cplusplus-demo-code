@@ -33,3 +33,15 @@ target_include_directories(select_signals_main PRIVATE ${TEST_NEW_DIR})
 if(COMMON_FLAGS)
   target_compile_options(select_signals_main PRIVATE ${COMMON_FLAGS})
 endif()
+
+# stacktrace_main
+add_executable(stacktrace_main stacktrace_main.cpp backward.cpp)
+# 添加 libdw 库
+target_link_libraries(stacktrace_main PRIVATE dw)
+# 定义 BACKWARD_HAS_DW=1 宏
+target_compile_definitions(stacktrace_main PRIVATE BACKWARD_HAS_DW=1)
+target_include_directories(stacktrace_main PRIVATE ${TEST_NEW_DIR})
+# 添加 common 编译选项
+if(COMMON_FLAGS)
+  target_compile_options(stacktrace_main PRIVATE ${COMMON_FLAGS})
+endif()

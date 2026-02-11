@@ -311,7 +311,7 @@ printer.object = true;
 
 ---
 
-## 一、ISO C99 标准信号（可移植）
+### 一、ISO C99 标准信号（可移植）
 
 | 宏 | 编号 | 含义与典型场景 |
 |----|------|----------------|
@@ -324,7 +324,7 @@ printer.object = true;
 
 ---
 
-## 二、POSIX 历史信号（常见于 Unix/Linux）
+### 二、POSIX 历史信号（常见于 Unix/Linux）
 
 | 宏 | 编号 | 含义与典型场景 |
 |----|------|----------------|
@@ -337,12 +337,74 @@ printer.object = true;
 
 ---
 
-## 三、小结
+### 三、小结
 
 - **C99 那组**：和“程序错误/异常/退出”紧密相关（崩溃、断言、除零、段错误、用户中断、请求退出）。
 - **POSIX 那组**：和“终端/会话/调试/通信/定时”相关（挂断、Ctrl+\、断点、强制杀、管道、闹钟）。
 - 编号在不同 Unix 系统上可能略有差异，所以代码里应始终用宏名（如 `SIGSEGV`），不要写死数字。
 - 除 **SIGKILL** 和 **SIGSTOP** 外，这些信号一般都可以被进程捕获（`signal()`/`sigaction()`）或忽略，用于自定义处理或优雅退出。
 
+准确定位到出错的位置
+
+```bash
+$ ./select_signals_main 
+--- select signals ---
+sh.loaded() == true
+Stack trace (most recent call last):
+#5    Object "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2", at 0xffffffffffffffff, in 
+#4    Object "/home/jindouchen/code/cplusplus-demo-code/17-backward_cpp/build/select_signals_main", at 0x58bb5dc07ec4, in _start
+#3    Source "../csu/libc-start.c", line 360, in __libc_start_main_impl [0x751c2622a28a]
+#2    Source "../sysdeps/nptl/libc_start_call_main.h", line 58, in __libc_start_call_main [0x751c2622a1c9]
+#1    Source "/home/jindouchen/code/cplusplus-demo-code/17-backward_cpp/select_signals_main.cpp", line 22, in main [0x58bb5dc08083]
+         19:     signals.push_back(SIGSEGV);
+         20:     SignalHandling sh(signals);
+         21:     std::cout << std::boolalpha << "sh.loaded() == " << sh.loaded() << std::endl;
+      >  22:     badass_function();
+         23: 
+         24:     return 0;
+         25: }
+#0    Source "/home/jindouchen/code/cplusplus-demo-code/17-backward_cpp/select_signals_main.cpp", line 12, in badass_function [0x58bb5dc07f9d]
+          9: void badass_function()
+         10: {
+         11:     char *ptr = (char *)42;
+      >  12:     *ptr = 42;
+         13: }
+         14: 
+         15: int main()
+Segmentation fault (Address not mapped to object [0x2a])
+段错误 (核心已转储)
+```
+
+## stacktrace_main.cpp
+
+这个和stacktrace_main.cpp的作用是一样的，都是打印栈的信息，细节区别如下
 
 
+### **rectrace** — 递归 + 复杂符号
+
+- **调用方式**：**递归**  
+  - `rec(st, level)` 或 `fib(st, level)`，同一函数在栈里出现多次。
+- **符号**：涉及嵌套命名空间、`struct`、`union`、静态成员等（如 `toto::titi::foo::bar::trampoline`），用来测 **demangle** 和复杂 C++ 名。
+- **目的**：验证  
+  1）**递归栈**下（重复的栈帧、可能较深的栈）栈回溯是否仍然正确；  
+  2）**复杂 C++ 名字**能否被正确解析和打印。
+
+---
+
+### **stacktrace** — 简单、线性调用栈
+
+- **调用方式**：**线性链式调用**，没有递归  
+  - `a()` → `b()` → `c()` → `d()`，在 `d()` 里调 `st.load_here()`。
+- **栈形状**：每一层都是不同的函数，栈帧不重复。
+- **目的**：验证「在普通、简单的调用链下，backward 能否正确收集并打印栈」。
+
+### 对比小结
+
+| 维度       | test_stacktrace        | test_rectrace                    |
+|------------|------------------------|----------------------------------|
+| 调用结构   | 线性 a→b→c→d          | 递归（rec / fib）                |
+| 栈帧       | 每层不同函数           | 同一函数多次出现                 |
+| 符号复杂度 | 简单函数名             | 命名空间/类/union 等             |
+| 侧重       | 基础「能打出栈」       | 递归 + 复杂名下的正确性/稳定性   |
+
+所以：**stacktrace 测的是「最基础的栈回溯」**，**rectrace 测的是「在递归和复杂 C++ 符号下栈回溯是否仍然可靠」**。
