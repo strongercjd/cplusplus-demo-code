@@ -21,6 +21,7 @@
 * 15-IPC_sysv 使用System V 消息队列的跨进程通信 C++ 演示项目
 * 16-libversion 主要展示了动态库版本兼容的问题
 * 17-backward_cpp C++程序崩溃时栈信息的抓取
+* 18-backward_cpp_lite 17的精简版融入具体的项目
 
 ## IPC 进程通信
 
