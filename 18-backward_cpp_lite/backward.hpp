@@ -4307,7 +4307,12 @@ public:
     }
 
     Printer printer;
-    printer.address = true;
+    printer.snippet = false;
+    std::ofstream ofs("crash.log", std::ios::app);
+    if (ofs) {
+      printer.print(st, ofs);
+      ofs.flush();
+    }
     printer.print(st, stderr);
 
 #if (defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 700) || \
