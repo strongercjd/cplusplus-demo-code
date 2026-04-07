@@ -22,6 +22,7 @@
 * 16-libversion 主要展示了动态库版本兼容的问题
 * 17-backward_cpp C++程序崩溃时栈信息的抓取
 * 18-backward_cpp_lite 17的精简版融入具体的项目
+* 19-DispatchLite 典型的事件驱动、线程模型解耦的框架,用于任务调度
 
 ## IPC 进程通信
 
